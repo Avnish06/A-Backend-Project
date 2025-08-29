@@ -26,6 +26,6 @@ fs.unlinkSync(localFilePath) //remove the locally saved temprory file as
                             //  the upload operation got filed
 return null;
 }
-
-
 }
+
+export {uploadonCloudinary}
