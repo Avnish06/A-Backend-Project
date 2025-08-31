@@ -17,7 +17,6 @@ const register = asyncHandler(async (requestAnimationFrame, res) => {
     //check for user creations
     //Send the res
 
-
     const { email, username, fullName, avataar, password } = req.body
     console.log(email)
 
@@ -28,7 +27,7 @@ const register = asyncHandler(async (requestAnimationFrame, res) => {
         throw new ApiError(400, "All fields are required")
     }
 
-    const existedUser = User.findOne({
+    const existedUser = await User.findOne({
         $or: [{ username }, { email }]
     })
 
@@ -44,7 +43,16 @@ const register = asyncHandler(async (requestAnimationFrame, res) => {
     }
 
     const avatar = await uploadonCloudinary(avatarLocalPath)
-    const coverImage = await uploadonCloudinary(coverImageLocalPath)
+    // const coverImage = await uploadonCloudinary(coverImageLocalPath)
+
+
+    let coverImage;
+
+    if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length>0)
+    {
+        coverImage = req.files.coverImage[0].path
+    }
+
 
     if (!avatar) {
         throw new ApiError(400, "Avatar us needed here")
@@ -67,7 +75,7 @@ const register = asyncHandler(async (requestAnimationFrame, res) => {
         throw new ApiError(500, "Something went wrong while registering the user")
     }
 
-    return res.statues(201).json(
+    return res.status(201).json(
         new ApiResponse(200, createdUser, "User Registered Successfully",)
     )
 
