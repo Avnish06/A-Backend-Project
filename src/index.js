@@ -9,26 +9,19 @@ dotenv.config({
 })
  
 
-
-
 ConnectDB()
-.then(() => {
-app.listen(process.env.PORT || 8000, ()=> {
-console.log(`Server is running on the port: ${process.env.PORT}`)
-
-app.on("error", (error)=> {
-console.log("Your error is here", error)
-})
-
-})
-})
-.catch((err) => {
-console.log("Mongodb connection failed !!!", err)
-
-})
-
-
-
+  .then(() => {
+    app.listen(process.env.PORT || 8000, () => {
+      console.log(`Server is running on the port: ${process.env.PORT}`);
+      
+      app.on("error", (error) => {
+        console.log("Your error is here", error);
+      });
+    });
+  })
+  .catch((err) => {
+    console.log("Mongodb connection failed !!!", err);
+  });
 
 
 
