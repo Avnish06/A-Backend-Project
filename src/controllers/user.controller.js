@@ -3,6 +3,9 @@ import { ApiError } from "../utils/Apierror.js";
 import { User } from "../models/user.model.js";
 import { uploadonCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/Apiresponse.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { JsonWebTokenError } from "jsonwebtoken";
+
 
 
 //Get users details from Frontend
@@ -96,8 +99,8 @@ const loginUser = asyncHandler(async (req, res) => {
     //access and refresh token
     //send cookie
 
-    const { email, username, password } = req.body
-    if (!username || !email) {
+    const { email, username, password } = req.body;
+    if (!(username || email)) {
         throw new ApiError(400, "Email or username is required")
     }
 
@@ -183,6 +186,33 @@ const logOutUser = asyncHandler(async (req, res) => {
 
 
 })
+
+
+const refreshAccessTokens = asyncHandler(async(req, res) => {
+
+    
+   const incomingRefreshToken =  req.cookies.refreshToken || req.body.refreshToken
+
+   if(!incomingRefreshToken) {
+
+
+   throw new ApiError(401," Unauthorized request")
+
+   JsonWebTokenError.verify(
+
+
+    
+   )
+
+
+
+   }
+
+
+})
+
+
+
 
 
 export { register, loginUser, logOutUser }
