@@ -45,10 +45,22 @@ const register = asyncHandler(async (req, res) => {
     // Pull data safely from req.body
     const { email, username, fullName, password } = req.body;
 
-    if (![email, username, fullName, password].every(field => field && field.trim() !== "")) {
-        throw new ApiError(400, "All fields are required");
+    if (
+        [fullName, email, username, password].some((field) => field?.trim() === "")
+    ) {
+        throw new ApiError(400, "All fields are required")
     }
 
+    const existedUser = await User.findOne({
+        $or: [{ username }, { email }]
+    })
+
+    if (existedUser) {
+        throw new ApiError(409, "User with email or username already exists")
+    }
+     
+
+        console.log(req.files)
     // Handle files
     const avatarLocalPath = req.files?.avataar?.[0]?.path;
     const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
