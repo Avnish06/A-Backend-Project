@@ -115,7 +115,7 @@ const loginUser = asyncHandler(async (req, res) => {
     if (!(username || email)) {
         throw new ApiError(400, "Email or username is required")
     }
-
+ 
 
     const user = await User.findOne({
         $or: [{ username }, { email }]
@@ -193,9 +193,6 @@ const logOutUser = asyncHandler(async (req, res) => {
        .clearCookie("accessToken", options)
        .clearCookie("refreshToken", options)
        .json(new ApiResponse(200, {}, "User loggedOut Successfully"))
-
-
-
 
 })
 
