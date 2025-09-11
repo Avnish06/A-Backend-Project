@@ -163,7 +163,7 @@ const loginUser = asyncHandler(async (req, res) => {
 //To remove the cookies first
 //Then remove the tokens
 
-const logOutUser = asyncHandler(async (req, res) => {
+    const logOutUser = asyncHandler(async (req, res) => {
 
     await User.findByIdAndUpdate(req.user._id, {
 
@@ -194,10 +194,10 @@ const logOutUser = asyncHandler(async (req, res) => {
        .clearCookie("refreshToken", options)
        .json(new ApiResponse(200, {}, "User loggedOut Successfully"))
 
-})
+    })
 
 
-const refreshAccessTokens = asyncHandler(async(req, res) => {
+    const refreshAccessTokens = asyncHandler(async(req, res) => {
 
     
    const incomingRefreshToken =  req.cookie.refreshToken || req.body.refreshToken
@@ -259,5 +259,64 @@ const refreshAccessTokens = asyncHandler(async(req, res) => {
   }
 
 
-})
-export { register, loginUser, logOutUser, refreshAccessTokens }
+    })
+
+   const changeCurrentpassword = asyncHandler(async(req, res) => {
+
+const {oldPassword, newPassword, confPassword} = req.body
+
+       if (newPassword != confPassword) {
+        
+           throw new ApiError(401, "The new Password and Confpassword is nor same")
+
+       }
+
+     const user = await User.findById(req.user?._id)
+
+    const isPasswordCorrect =  await user.isPasswordCorrect(oldPassword)
+     
+    if (!isPasswordCorrect) {
+       throw new ApiError(401, "Password, that you are providing is not correct")
+    }
+
+    user.password = newPassword
+    await user.save({validateBeforeSave: false})
+
+
+    return res.
+          status(200)
+          .json(new ApiResponse(200,{}, "Password change successfully " ))
+
+    })
+
+    const getCurrentUser = asyncHandler(async(req, res)=> {
+    const currentUser = req.user
+
+    res.status(200)
+       .json(new ApiResponse(200, currentUser, "Current user fetched successfully"))
+
+
+    })
+   
+    const updateUserDetails = asyncHandler(async(req, res) => {
+
+       const {fullName, email, } = req.body
+
+       if(!fullName || !email)
+       {
+        throw new ApiError(401, "User details is required")
+       }
+
+        
+
+    })
+
+
+export { register,
+         loginUser,
+         logOutUser,
+         refreshAccessTokens,
+         changeCurrentpassword,
+         getCurrentUser
+
+         }
