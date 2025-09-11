@@ -307,9 +307,22 @@ const {oldPassword, newPassword, confPassword} = req.body
         throw new ApiError(401, "User details is required")
        }
 
-        
+       const user = User.findByIdAndUpdate(req.user._id,
+                               {
 
-    })
+                               $set:{
+
+                                fullName,
+                                email
+
+                               }
+
+                               },
+                               {new : true}).select("-password")
+
+                               res.status
+
+                    })
 
 
 export { register,
