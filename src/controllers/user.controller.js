@@ -243,7 +243,6 @@ const refreshAccessTokens = asyncHandler(async (req, res) => {
                     { accesstokens, refreshToken: newrefreshtokens },
                     "Access token refreshed successfully"
 
-
                 )
 
 
@@ -400,17 +399,85 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 
 const getuserChannelsProfile = asyncHandler(async(req, res)=> {
 
-    const {username} = req.params 
-    if(!username?.trim())
-    {
-      throw new ApiError(400, "User Name is missing")
+    const { username } = req.params
+    if (!username?.trim()) {
+        throw new ApiError(400, "User Name is missing")
     }
 
-    User.find({username})
+    User.find({ username })
 
-    const chanel = await User.aggregate([])
+    const channel = await User.aggregate([
+        {
+            $match: { username: username }
+        },
+        {
+            $lookup: {
+
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "channel",
+                as: "subscribers"
+
+            }
+        },
+        {
+
+            $lookup: {
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "subscribers",
+                as: "subscribedTo"
+            }
+        },
+        {
+            $addFields: {
+
+                subscribersCount: {
+                    $size: "$subscribers"
+                },
+                channelSubscribedToCount: {
+                    $size: "$subscribedTo"
+                },
+                isSubscribed: {
+
+                    $cond: {
+                        if: { $in: [req.user._id, "$subscribers.subscriber"] },
+                        then: true,
+                        else: false
+
+                    }
+
+                },
+
+            }
+
+        },
+        {
+            $project: {
+                fullName: 1,
+                username: 1,
+                subscribersCount: 1,
+                channelSubscribedToCount: 1,
+                isSubscribed: 1,
+                avatar: 1,
+                coverImage: 1,
+                email: 1,
 
 
+            }
+        }
+
+
+    ])
+
+    if (!channel?.length) {
+        throw new ApiError(400, "Channel doesn't exist")
+
+    }
+
+    console.log(channel)
+    return res.status(400)
+        .json(new ApiResponse(200, channel[0], "User channel fetched successfully"))
 })
 
 
@@ -423,6 +490,7 @@ const getuserChannelsProfile = asyncHandler(async(req, res)=> {
         getCurrentUser,
         updateUserDetails,
         updateUserAvatar,
-        updateUserCoverImage
+        updateUserCoverImage,
+        getuserChannelsProfile
 
     }

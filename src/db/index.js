@@ -16,4 +16,4 @@ try {
 }
 
 
-export default ConnectDB
+export default ConnectDB 
