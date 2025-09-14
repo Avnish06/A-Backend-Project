@@ -295,7 +295,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 
 })
 
-const updateUserDetails = asyncHandler(async (req, res) => {
+const updateAccountDetails = asyncHandler(async (req, res) => {
 
     const { fullName, email, } = req.body
 
@@ -480,6 +480,64 @@ const getuserChannelsProfile = asyncHandler(async(req, res)=> {
         .json(new ApiResponse(200, channel[0], "User channel fetched successfully"))
 })
 
+const getWatchHistory = asyncHandler(async(req, res) => {
+
+    const user = await User.aggregate([
+     
+        {
+
+           $match: new mongoose.Types.ObjectId(req.users._id)
+
+        },
+        {
+           $lookup: {
+               from: "videos",
+               localField: "watchHistory",
+               foreignField: "_id",
+               as: "watchHistory",
+            pipeline :[
+             {
+             $lookup:{
+               from: "users",
+               localField:"owner",
+               foreignField:"_id",
+               as: "owner",
+               pipeline :[{
+                $project:{
+
+                fullName:1,
+                username:1,
+                avatar:1,
+                }
+               },
+               {
+            $addFields:{
+                owner:{
+                    $first:"$owner"
+                      }
+              }  
+              }
+              ]
+                }
+             }
+            ]
+           }
+
+        }   
+    ])
+
+     return res.status(200)
+                .json(
+                new ApiResponse(
+                   200,
+                   user[0].watchHistory,
+                   "Watch History has been fetched successfully"
+                )
+                )
+})
+
+
+
 
     export {
         register,
@@ -488,9 +546,10 @@ const getuserChannelsProfile = asyncHandler(async(req, res)=> {
         refreshAccessTokens,
         changeCurrentpassword,
         getCurrentUser,
-        updateUserDetails,
+         updateAccountDetails,
         updateUserAvatar,
         updateUserCoverImage,
-        getuserChannelsProfile
+        getuserChannelsProfile,
+        getWatchHistory
 
     }
